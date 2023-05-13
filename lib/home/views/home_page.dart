@@ -12,7 +12,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeCubit(),
+      create: (context) => HomeCubit(Injector.di.get<HomeRepository>()),
       child:  _HomeView(),
     );
   }
@@ -33,7 +33,7 @@ class _HomeView extends StatelessWidget {
         }
 
         if (state.status == HomeStatus.loaded) {
-          ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text('Loaded...'),));
+          ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text('Loaded...${state.searchCategory}'),));
           Navigator.of(context).pushNamed(ChatPage.route);
         }
 
