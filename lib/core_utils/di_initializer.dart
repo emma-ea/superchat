@@ -1,3 +1,4 @@
+import 'package:superchat/chat/chat.dart';
 import 'package:superchat/home/home.dart';
 
 class DIInitializer {
@@ -6,6 +7,7 @@ class DIInitializer {
 
   static void init() {
     HomeInjector.instance.initialize();
+    ChatInjector.instance.initialize();
   }
 
 }
