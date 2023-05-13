@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:superchat/core_utils/chat_exceptions.dart';
 import 'package:superchat/core_utils/constants.dart';
@@ -28,6 +29,7 @@ class RemoteDataSource {
       throw const UserCreationException('Couldn\'t access user id');
     }
 
+    await updateActiveUserInfo(user.user!.uid, isActive: true);
     return user.user?.uid ?? 'random-11223';
   }
 
@@ -41,20 +43,29 @@ class RemoteDataSource {
   }
 
   Future<void> updateActiveUserInfo(String userId, {bool isActive = false}) async {
+
+    final deviceInfo = await DeviceInfoPlugin().deviceInfo;
+
     db.collection(AppConstants.firestoreUserCollections)
       .doc(userId)
       .set({
         'active': isActive,
+        'uid': userId,
         'last_visited': DateTime.now(),
+        'device': deviceInfo.data.toString(),
       }).onError((error, stackTrace) => UserInfoUpdateException(error as String));
   }
 
   Future<void> getActiveUsers() async {
     db.collection(AppConstants.firestoreUserCollections)
       .snapshots()
-      .listen((event) {
-        print(event.docs.first.data());
-        activeUsersController.sink.add(event.size);
+      .listen((documents) {
+        if (documents.docs.isNotEmpty) {
+          final filteredDocs = documents.docs;
+          filteredDocs.removeWhere((doc) => doc.id == auth.currentUser!.uid);
+          filteredDocs.retainWhere((doc) => doc.data()['active'] as bool);
+          activeUsersController.sink.add(filteredDocs.length);
+        }
       });
   }
 

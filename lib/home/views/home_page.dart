@@ -51,12 +51,15 @@ class _HomeView extends StatelessWidget {
               Spacer(),
               Text('Superchat'),
               const SizedBox(height: 20,),
-              Text('Hang out with strangers online'),
+              Text('chat with strangers'),
               const SizedBox(height: 20,),
               StreamBuilder<int>(
                 stream: context.read<HomeCubit>().getActiveUsers(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
+                    if (snapshot.data == 0) {
+                      return const Text('Invite your friends');
+                    }
                     return Text('Users online: ${snapshot.data}');
                   }
                   return const SizedBox.shrink();
