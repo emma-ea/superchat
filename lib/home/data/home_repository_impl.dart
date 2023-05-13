@@ -8,13 +8,22 @@ class HomeRepositoryImpl extends HomeRepository {
   HomeRepositoryImpl(this._dataSource);
 
   @override
-  Future<String> createUser() {
-    return _dataSource.createUser();
+  Future<String> getUser() async {
+    final user = await _dataSource.getUser();
+    if (user.isEmpty) {
+      return _dataSource.createUser();
+    }
+    return user;
   }
 
   @override
-  Future<void> processCategory() {
-    return _dataSource.processCategory();
+  Future<int> processCategory({required String term}) {
+    return _dataSource.processCategory(term);
+  }
+  
+  @override
+  Stream<int> getActiveUsers() {
+    return _dataSource.activeUsers;
   }
 
 }

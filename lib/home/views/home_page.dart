@@ -38,7 +38,8 @@ class _HomeView extends StatelessWidget {
         }
 
         if (state.status == HomeStatus.error) {
-          ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text('Error...'),));
+          final error = state.extra['error'] as String;
+          ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text('Error... $error'),));
         }
       },
       child: Scaffold(
@@ -51,6 +52,16 @@ class _HomeView extends StatelessWidget {
               Text('Superchat'),
               const SizedBox(height: 20,),
               Text('Hang out with strangers online'),
+              const SizedBox(height: 20,),
+              StreamBuilder<int>(
+                stream: context.read<HomeCubit>().getActiveUsers(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text('Users online: ${snapshot.data}');
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               Spacer(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

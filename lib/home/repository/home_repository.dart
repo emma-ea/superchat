@@ -1,7 +1,9 @@
 abstract class HomeRepository {
 
-  Future<String> createUser();
+  Future<String> getUser();
 
-  Future<void> processCategory();
+  Stream<int> getActiveUsers();
+
+  Future<int> processCategory({required String term});
 
 }
