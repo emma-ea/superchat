@@ -61,15 +61,31 @@ class RemoteDataSource {
       .snapshots()
       .listen((documents) {
         if (documents.docs.isNotEmpty) {
-          final filteredDocs = documents.docs;
-          filteredDocs.removeWhere((doc) => doc.id == auth.currentUser!.uid);
-          filteredDocs.retainWhere((doc) => doc.data()['active'] as bool);
-          activeUsersController.sink.add(filteredDocs.length);
+          activeUsersController.sink.add(filterActiveUsers(documents));
         }
       });
   }
 
-  int filterActiveUsers() {
+  int filterActiveUsers(QuerySnapshot<Map<String, dynamic>> documents) {
+    final filteredDocs = documents.docs;
+    filteredDocs.removeWhere((doc) => doc.id == auth.currentUser!.uid);
+    filteredDocs.retainWhere((doc) => (doc.data()['active'] as bool));
+    return filteredDocs.length;
+  }
+
+  Future<List<String>> getUsersInCategory(String term) async {
+    final categories = await db.collection(AppConstants.firestoreCategoryCollections)
+      .doc(term.toLowerCase())
+      .get()
+      .onError((error, stackTrace) => 
+        throw CategoryCreationException(error as String)
+      );
+    if (!categories.exists) { return []; }
+
+    return (categories.data()?[AppConstants.firestoreCategoryWaitingRoom] as List).map((e) => e as String).toList();
+  }
+
+  Future<void> removeUserFromWaitingRoom() {
     throw UnimplementedError('TODO');
   }
 
@@ -77,9 +93,12 @@ class RemoteDataSource {
 
     int results = -1;
 
+    final categories = await getUsersInCategory(term);
+    categories.add(await getUser());
+
     final data = {
-      'userId': await getUser(),
-      'time': DateTime.now(),
+      'waiting_users': categories,
+      'recent_search': DateTime.now(),
     };
 
     await db.collection(AppConstants.firestoreCategoryCollections)
