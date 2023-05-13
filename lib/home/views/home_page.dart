@@ -12,7 +12,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeCubit(Injector.di.get<HomeRepository>()),
+      create: (context) => HomeCubit(Injector.di.get<HomeRepository>())..getUser(),
       child:  _HomeView(),
     );
   }
@@ -29,7 +29,7 @@ class _HomeView extends StatelessWidget {
       listenWhen: (previous, current) => previous != current,
       listener: (context, state) {
         if (state.status == HomeStatus.loading) {
-          ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text('Loading...'),));
+          ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(const SnackBar(content: Text('Loading...'),));
         }
 
         if (state.status == HomeStatus.loaded) {

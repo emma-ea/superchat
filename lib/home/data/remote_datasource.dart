@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:superchat/core_utils/chat_exceptions.dart';
 import 'package:superchat/core_utils/constants.dart';
 
 class RemoteDataSource {
 
   FirebaseFirestore db = FirebaseFirestore.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   StreamController<int> activeUsersController = StreamController.broadcast();
 
@@ -17,11 +19,34 @@ class RemoteDataSource {
   }
   
   Future<String> createUser() async {
-    return "user-john-doe";
+    final user = await auth
+      .signInAnonymously()
+      .onError((error, stackTrace) => 
+        throw UserCreationException(error as String));
+
+    if (user.user?.uid == null) {
+      throw const UserCreationException('Couldn\'t access user id');
+    }
+
+    return user.user?.uid ?? 'random-11223';
   }
 
-  Future<String> getUser() async {
-    return "";
+  Future<String> getUser({bool? signOff}) async {
+    String uid = '';
+    if (auth.currentUser != null) {
+      uid = auth.currentUser!.uid;
+      await updateActiveUserInfo(uid, isActive: signOff ?? true);
+    }
+    return uid;
+  }
+
+  Future<void> updateActiveUserInfo(String userId, {bool isActive = false}) async {
+    db.collection(AppConstants.firestoreUserCollections)
+      .doc(userId)
+      .set({
+        'active': isActive,
+        'last_visited': DateTime.now(),
+      }).onError((error, stackTrace) => UserInfoUpdateException(error as String));
   }
 
   Future<void> getActiveUsers() async {
@@ -42,7 +67,7 @@ class RemoteDataSource {
     int results = -1;
 
     final data = {
-      'userId': await createUser(),
+      'userId': await getUser(),
       'time': DateTime.now(),
     };
 

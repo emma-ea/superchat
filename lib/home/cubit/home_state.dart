@@ -24,6 +24,7 @@ class HomeState extends Equatable {
 enum HomeStatus {
   initial,
   loading,
+  userLoaded,
   loaded,
   error,
 }
