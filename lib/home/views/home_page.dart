@@ -43,8 +43,9 @@ class _HomeView extends StatelessWidget {
         }
       },
       child: Scaffold(
-        body: Padding(
+        body: Container(
           padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.symmetric(horizontal: 50),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
