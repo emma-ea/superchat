@@ -13,7 +13,7 @@ class ChatItem extends StatelessWidget {
       : Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: chat!.sent ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(chat!.message),

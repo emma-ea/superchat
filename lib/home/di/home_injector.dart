@@ -1,13 +1,13 @@
 import 'package:get_it/get_it.dart';
 import 'package:superchat/home/home.dart';
 
-class Injector {
+class HomeInjector {
 
-  Injector._();
+  HomeInjector._();
 
-  static final Injector _instance = Injector._();
+  static final HomeInjector _instance = HomeInjector._();
 
-  static Injector get instance => _instance;
+  static HomeInjector get instance => _instance;
 
   static late final GetIt _di;
 

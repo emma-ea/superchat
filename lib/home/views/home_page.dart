@@ -12,7 +12,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeCubit(Injector.di.get<HomeRepository>())..getUser(),
+      create: (context) => HomeCubit(HomeInjector.di.get<HomeRepository>())..getUser(),
       child:  _HomeView(),
     );
   }
