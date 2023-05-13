@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 part 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
+
+  // get repository/usecase
   
   HomeCubit() : super(const HomeState());
 

@@ -2,22 +2,20 @@ part of 'home_cubit.dart';
 
 class HomeState extends Equatable {
 
-  final HomeStatus _status;
-  final String _searchCategory;
+  final HomeStatus status;
+  final String searchCategory;
 
-  const HomeState({HomeStatus status = HomeStatus.initial, String category = ''}) 
-    : _status = status, 
-    _searchCategory = category;
+  const HomeState({this.status = HomeStatus.initial, this.searchCategory = ''});
 
   HomeState copyWith({HomeStatus? status, String? searchCategory}) {
     return HomeState(
-      status: status ?? _status,
-      category: searchCategory ?? _searchCategory,
+      status: status ?? this.status,
+      searchCategory: searchCategory ?? this.searchCategory,
     );
   }
 
   @override
-  List<Object?> get props => [_status, _searchCategory];
+  List<Object?> get props => [status, searchCategory];
 
 }
 
