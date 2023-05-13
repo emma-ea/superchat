@@ -25,6 +25,8 @@ enum HomeStatus {
   initial,
   loading,
   userLoaded,
+  userLoading,
+  userError,
   loaded,
   error,
 }

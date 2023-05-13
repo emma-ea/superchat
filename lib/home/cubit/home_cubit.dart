@@ -30,11 +30,11 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> getUser() async {
     try {
-      emit(state.copyWith(status: HomeStatus.loading));
+      emit(state.copyWith(status: HomeStatus.userLoading));
       final user = await repository.getUser();
       emit(state.copyWith(status: HomeStatus.userLoaded, extra: {'user': user}));
     } catch (e) {
-      emit(state.copyWith(status: HomeStatus.error, extra: {'error': '$e'}));
+      emit(state.copyWith(status: HomeStatus.userError, extra: {'error': '$e'}));
     }
   }
 

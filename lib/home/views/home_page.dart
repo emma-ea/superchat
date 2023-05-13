@@ -25,7 +25,7 @@ class _HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<HomeCubit, HomeState>(
+    return BlocConsumer<HomeCubit, HomeState>(
       listenWhen: (previous, current) => previous != current,
       listener: (context, state) {
         if (state.status == HomeStatus.loading) {
@@ -42,69 +42,62 @@ class _HomeView extends StatelessWidget {
           ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text('Error... $error'),));
         }
       },
-      child: Scaffold(
-        body: Container(
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.symmetric(horizontal: 50),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Spacer(),
-              Text('Superchat'),
-              const SizedBox(height: 20,),
-              Text('chat with strangers'),
-              const SizedBox(height: 20,),
-              StreamBuilder<int>(
-                stream: context.read<HomeCubit>().getActiveUsers(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    if (snapshot.data == 0) {
-                      return const Text('Invite your friends');
-                    }
-                    return Text('Users online: ${snapshot.data}');
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-              Spacer(),
-              Row(
+      builder:(context, state) {
+        if (state.status == HomeStatus.userLoading) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (state.status == HomeStatus.userLoaded) {
+          return Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.symmetric(horizontal: 50),
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * .7 , 
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextField(
-                          controller: categoryController,
-                          decoration: const InputDecoration(
-                            hintText: 'School, Coding, Anime, etc...',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 3,),
-                        const Text('Search for a category', style: TextStyle(fontSize: 9),),
-                      ],
-                    ),
+                  Spacer(),
+                  Text('Superchat'),
+                  const SizedBox(height: 20,),
+                  Text('chat with strangers'),
+                  const SizedBox(height: 20,),
+                  StreamBuilder<int>(
+                    stream: context.read<HomeCubit>().getActiveUsers(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        if (snapshot.data == 0) {
+                          return const Text('No one seems to be here. Invite your friends');
+                        }
+                        return Text('Users online: ${snapshot.data}');
+                      }
+                      return const SizedBox.shrink();
+                    },
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 12.0,),
-                    child: IconButton(
-                      iconSize: 30.0,
-                      onPressed: () {
-                        context.read<HomeCubit>().searchCategory(category: categoryController.text);
-                      }, 
-                      icon: const Icon(Icons.send_outlined),
-                    ),
+                  const Spacer(),
+                  CategoryChatInput(
+                    hint: 'School, Coding, Anime, etc...',
+                    controller: categoryController, 
+                    onTap: () {},
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          );
+        }
+
+        if (state.status == HomeStatus.userError) {
+          return Scaffold(
+            body: Center(
+              child: Text('An error occured\n${state.extra['error']}'),
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
     );
   }
 }
