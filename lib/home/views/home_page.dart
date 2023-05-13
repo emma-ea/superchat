@@ -34,7 +34,7 @@ class _HomeView extends StatelessWidget {
 
         if (state.status == HomeStatus.loaded) {
           ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text('Loaded...${state.searchCategory}'),));
-          Navigator.of(context).pushNamed(ChatPage.route);
+          Navigator.of(context).pushNamed(ChatPage.route, arguments: {'category': state.searchCategory});
         }
 
         if (state.status == HomeStatus.error) {

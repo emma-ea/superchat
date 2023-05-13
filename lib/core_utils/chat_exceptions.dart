@@ -16,12 +16,20 @@ class CategoryCreationException extends ChatExceptions {
   const CategoryCreationException(super.error);
 }
 
+class CategoryFetchException extends ChatExceptions {
+  const CategoryFetchException(super.error);
+}
+
 class UserCreationException extends ChatExceptions {
   const UserCreationException(super.error);
 }
 
 class UserInfoUpdateException extends ChatExceptions {
   const UserInfoUpdateException(super.error);
+}
+
+class ChatRoomCreationException extends ChatExceptions {
+  const ChatRoomCreationException(super.error);
 }
 
 class DataConnectionTimeout extends ChatExceptions {

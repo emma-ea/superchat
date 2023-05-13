@@ -11,18 +11,36 @@ class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ChatBloc>(
-      create: (context) => ChatBloc(
-        repository: ChatInjector.di.get<ChatRepository>(),
-      )..add(SetupChatRoomEvent()),
-      child: _ChatView(),
+      create: (context) => 
+        ChatBloc(repository: ChatInjector.di.get<ChatRepository>(),),
+      child: const _ChatView(),
     );
   }
 }
 
-class _ChatView extends StatelessWidget {
-  _ChatView({super.key});
+class _ChatView extends StatefulWidget {
+  const _ChatView({super.key});
+
+  @override
+  State<StatefulWidget> createState() {
+    return _ChatViewState();
+  }
+}
+
+class _ChatViewState extends State<_ChatView> {
 
   final chatController = TextEditingController();
+  String? category = '';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    category = (ModalRoute.of(context)!.settings.arguments as Map<String, String>)['category'];
+    if (category != null || category!.isNotEmpty) {
+      context.read<ChatBloc>().add(SetupChatRoomEvent(category: category!));  
+    }
+    
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,64 +49,38 @@ class _ChatView extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         margin: const EdgeInsets.symmetric(horizontal: 100),
         child: BlocBuilder<ChatBloc, ChatState>(
+          buildWhen: (previous, current) => previous != current,
           builder: (context, state) {
             if (state.status == ChatStatus.loaded) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   // chat lists
-                  StreamBuilder<List<Chat>>(
-                    initialData: dummy,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 55.0, bottom: 10.0),
-                            child: ListView.builder(
-                              reverse: true,
-                              itemCount: snapshot.data?.length,
-                              itemBuilder: (context, index) {
-                                return ChatItem(chat: snapshot.data?[index]);
-                              },
-                            ),
-                          ),
-                        );
-                      }
-                      return const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('Connected with user with id: 11122112'),
-                      );
+                  const ChatList(),
+                  ChatInput(
+                    hintText: 'Start chatting...',
+                    controller: chatController, 
+                    onTap: () {
+                      chatController.text = '';
                     },
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: chatController,
-                          decoration: const InputDecoration(
-                            hintText: 'Start chatting...',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 12.0,),
-                        child: IconButton(
-                          iconSize: 30.0,
-                          onPressed: () {
-                            
-                          }, 
-                          icon: const Icon(Icons.send_outlined),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               );
             }
-            return SizedBox.shrink();
+            if (state.status == ChatStatus.loading) {
+              return SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 12,),
+                    Text('Setting up chat room...'),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
           },
         ),
       ),

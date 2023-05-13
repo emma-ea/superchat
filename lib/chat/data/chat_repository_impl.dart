@@ -21,8 +21,7 @@ class ChatRepositoryImpl extends ChatRepository {
   }
 
   @override
-  Future<void> setupChatRoom() {
-    // TODO: implement setupChatRoom
-    throw UnimplementedError();
+  Future<void> setupChatRoom({required String category}) {
+    return _datasource.setupChatRoom(category);
   }
 }

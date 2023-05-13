@@ -18,11 +18,13 @@ class HomeCubit extends Cubit<HomeState> {
     int res = await repository.processCategory(term: category);
 
     if (res == 1) {
-      emit(state.copyWith(status: HomeStatus.loaded, extra: {'result': '$res'}));
+      emit(state.copyWith(status: HomeStatus.loaded, searchCategory: category, extra: {'result': '$res'}));
     }
 
     } on CategoryCreationException catch (e, _) {
       emit(state.copyWith(status: HomeStatus.error, extra: {'error': e.error}));
+    } catch (e) {
+      emit(state.copyWith(status: HomeStatus.error, extra: {'error': e.toString()}));
     }
   }
 

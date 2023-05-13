@@ -2,6 +2,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:superchat/chat/chat.dart';
+import 'package:superchat/chat/data/chat.dart';
 import 'package:superchat/chat/repository/chat_repository.dart';
 
 part 'chat_events.dart';
@@ -21,7 +22,13 @@ class ChatBloc extends Bloc<ChatEvents, ChatState> {
     SetupChatRoomEvent event,
     Emitter<ChatState> emit,
   ) async {
-    
+    try {
+      emit(state.copyWith(status: ChatStatus.loading));
+      await _repository.setupChatRoom(category: event.category);
+      emit(state.copyWith(status: ChatStatus.loaded));
+    } catch (e) {
+      emit(state.copyWith(status: ChatStatus.error));
+    }
   }
 
 }

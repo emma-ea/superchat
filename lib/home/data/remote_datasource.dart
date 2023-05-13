@@ -80,7 +80,13 @@ class RemoteDataSource {
       .onError((error, stackTrace) => 
         throw CategoryCreationException(error as String)
       );
+
     if (!categories.exists) { return []; }
+
+    print('-----------------------');
+    print(categories.data()![AppConstants.firestoreCategoryWaitingRoom]);
+    print('-----------------------');
+    if (categories.data()![AppConstants.firestoreCategoryWaitingRoom] == Null) return [];
 
     return (categories.data()?[AppConstants.firestoreCategoryWaitingRoom] as List).map((e) => e as String).toList();
   }
