@@ -59,5 +59,6 @@ class DefaultFirebaseOptions {
     projectId: 'superchat-413e6',
     authDomain: 'superchat-413e6.firebaseapp.com',
     storageBucket: 'superchat-413e6.appspot.com',
+    measurementId: 'G-LCFMGBJC15',
   );
 }
