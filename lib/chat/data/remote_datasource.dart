@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,7 +11,11 @@ class ChatRemoteDatasource {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> setupChatRoom(String term) async {
+  StreamController<String> chatRoomListener = StreamController.broadcast();
+
+  Stream<String> get getUserInRoom => chatRoomListener.stream;
+
+  Future<int> setupChatRoom(String term) async {
     final randomUser = await getRandomUserFromCategory(term);
     final docName = '${_auth.currentUser!.uid}-$randomUser';
 
@@ -18,11 +23,32 @@ class ChatRemoteDatasource {
     print(docName);
     print('---------------');
 
+    if (randomUser.isEmpty) {
+      return 112;
+    }
+
     _db.collection(AppConstants.firestoreRandomChats)
       .doc(docName)
       .set({'time': DateTime.now()})
       .onError((error, stackTrace) => ChatRoomCreationException(error as String));
 
+    return 100;
+
+  }
+
+  void listenToEmptyRoom() {
+    _db.collection(AppConstants.firestoreRandomChats)
+      .snapshots()
+      .listen((event) {
+        if (event.size > 0) {
+          final doc = event.docs.firstWhere((element) => element.id.contains(_auth.currentUser!.uid));
+          chatRoomListener.sink.add(doc.id);
+          chatRoomListener.done;
+          print('---------$runtimeType--------');
+          print('ending stream. user found waiting');
+          print('-----------------');
+        }
+      });
   }
 
   Future<String> getRandomUserFromCategory(String term) async {

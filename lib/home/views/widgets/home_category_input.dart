@@ -37,9 +37,7 @@ class CategoryChatInput extends StatelessWidget {
           padding: const EdgeInsets.only(left: 12.0,),
           child: IconButton(
             iconSize: 30.0,
-            onPressed: () {
-              context.read<HomeCubit>().searchCategory(category: controller!.text);
-            }, 
+            onPressed: onTap, 
             icon: const Icon(Icons.send_outlined),
           ),
         ),

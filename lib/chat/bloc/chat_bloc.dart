@@ -16,6 +16,22 @@ class ChatBloc extends Bloc<ChatEvents, ChatState> {
   : _repository = repository, 
   super(ChatState()) {
     on<SetupChatRoomEvent>(_setupChatRoom);
+    on<ListenForUsersEvent>(_listenForUsers);
+  }
+
+  void _listenForUsers(
+    ListenForUsersEvent event,
+    Emitter<ChatState> emit,
+  ) {
+    _repository.listenToEmptyRoom().listen((chatRoom) { 
+      if (chatRoom.split('-').length == 2) {
+        emit(state.copyWith(status: ChatStatus.loaded));
+      }
+    });
+  }
+
+  void listenToRoom() {
+    return _repository.listenToRoom();
   }
 
   Future<void> _setupChatRoom(
@@ -24,8 +40,12 @@ class ChatBloc extends Bloc<ChatEvents, ChatState> {
   ) async {
     try {
       emit(state.copyWith(status: ChatStatus.loading));
-      await _repository.setupChatRoom(category: event.category);
-      emit(state.copyWith(status: ChatStatus.loaded));
+      final res = await _repository.setupChatRoom(category: event.category);
+      if (res == 112) {
+        emit(state.copyWith(status: ChatStatus.emptyRoom));
+      } else {
+        emit(state.copyWith(status: ChatStatus.loaded));
+      }
     } catch (e) {
       emit(state.copyWith(status: ChatStatus.error));
     }

@@ -6,3 +6,5 @@ class SetupChatRoomEvent extends ChatEvents {
   final String category;
   SetupChatRoomEvent({required this.category});
 }
+
+class ListenForUsersEvent extends ChatEvents {}

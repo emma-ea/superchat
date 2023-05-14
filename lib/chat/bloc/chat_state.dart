@@ -23,5 +23,6 @@ enum ChatStatus {
   initial,
   loading,
   loaded,
+  emptyRoom,
   error,
 }

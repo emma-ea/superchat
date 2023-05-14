@@ -83,7 +83,7 @@ class RemoteDataSource {
 
     if (!categories.exists) { return []; }
 
-    print('-----------------------');
+    print('----------getUsersInCategory-------------');
     print(categories.data()![AppConstants.firestoreCategoryWaitingRoom]);
     print('-----------------------');
     if (categories.data()![AppConstants.firestoreCategoryWaitingRoom] == Null) return [];

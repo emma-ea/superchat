@@ -8,13 +8,22 @@ class ChatPage extends StatelessWidget {
 
   static String route = "/chat";
 
+  static Route routeWithParams(String category) {
+    return MaterialPageRoute(
+      builder: (context) =>
+        BlocProvider<ChatBloc>(
+          create: (context) => ChatBloc(repository: ChatInjector.di.get<ChatRepository>(),),
+          child: const ChatPage(),
+        ),
+        settings: RouteSettings(
+          name: route,
+        )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ChatBloc>(
-      create: (context) => 
-        ChatBloc(repository: ChatInjector.di.get<ChatRepository>(),),
-      child: const _ChatView(),
-    );
+    return const _ChatView();
   }
 }
 
@@ -33,24 +42,39 @@ class _ChatViewState extends State<_ChatView> {
   String? category = '';
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    category = (ModalRoute.of(context)!.settings.arguments as Map<String, String>)['category'];
-    if (category != null || category!.isNotEmpty) {
-      context.read<ChatBloc>().add(SetupChatRoomEvent(category: category!));  
-    }
-    
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.all(20.0),
         margin: const EdgeInsets.symmetric(horizontal: 100),
-        child: BlocBuilder<ChatBloc, ChatState>(
+        child: BlocConsumer<ChatBloc, ChatState>(
+          listenWhen: (previous, current) => previous != current,
+          listener: (context, state) {
+            if (state.status == ChatStatus.emptyRoom) {
+              context.read<ChatBloc>().listenToRoom();
+              context.read<ChatBloc>().add(ListenForUsersEvent());
+            }
+          },
           buildWhen: (previous, current) => previous != current,
           builder: (context, state) {
+            if (state.status == ChatStatus.emptyRoom) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // chat lists
+                  const Center(
+                    child: Text('Waiting for a user to join...'),
+                  ),
+                  ChatInput(
+                    hintText: 'Start chatting...',
+                    controller: chatController, 
+                    onTap: () {
+                      chatController.text = '';
+                    },
+                  ),
+                ],
+              );
+            }
             if (state.status == ChatStatus.loaded) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -63,6 +87,9 @@ class _ChatViewState extends State<_ChatView> {
                     onTap: () {
                       chatController.text = '';
                     },
+                  ),
+                  const Center(
+                    child: Text('Connected to a random user'),
                   ),
                 ],
               );
