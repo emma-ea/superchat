@@ -15,3 +15,11 @@ class FoundChatRoomEvent extends ChatEvents {
   final String roomId;
   FoundChatRoomEvent(this.roomId);
 }
+
+class SendChatEvent extends ChatEvents {
+  final Chat chat;
+  final String roomId;
+  SendChatEvent({required this.chat, required this.roomId});
+}
+
+class ListenForIncomingMessages extends ChatEvents {}

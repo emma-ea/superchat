@@ -9,13 +9,14 @@ class ChatPage extends StatelessWidget {
 
   static String route = "/chat";
 
-  static Route routeWithParams(String category) {
+  static Route routeWithParams(String category, String userId) {
     return MaterialPageRoute(
       builder: (context) =>
         BlocProvider<ChatBloc>(
           create: (context) => ChatBloc(
             repository: ChatInjector.di.get<ChatRepository>(),
             topic: category,
+            userId: userId,
           )..add(ListenForUsersEvent()),
           child: const ChatPage(),
         ),
@@ -64,6 +65,10 @@ class _ChatViewState extends State<_ChatView> {
             if (state.status == ChatStatus.emptyRoom) {
               // context.read<ChatBloc>().add(ListenToRoomEvent());
             }
+
+            if (state.status == ChatStatus.loaded) {
+              context.read<ChatBloc>().add(ListenForIncomingMessages());
+            }
           },
           buildWhen: (previous, current) => previous != current,
           builder: (context, state) {
@@ -98,7 +103,12 @@ class _ChatViewState extends State<_ChatView> {
                     hintText: 'Start chatting...',
                     controller: chatController, 
                     onTap: () {
-                      chatController.text = '';
+                      if (chatController.text.trim().isNotEmpty) {
+                        final roomId = context.read<ChatBloc>().state.roomId!;
+                        final message = chatController.text;
+                        final chat = Chat(message: message, sentTime: DateTime.now());
+                        context.read<ChatBloc>().add(SendChatEvent(chat: chat, roomId: roomId));
+                      }
                     },
                   ),
                   const Center(

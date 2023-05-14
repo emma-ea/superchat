@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:superchat/chat/chat.dart';
 import 'package:superchat/chat/data/chat.dart';
 
@@ -7,8 +8,9 @@ class ChatList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final state = context.select((ChatBloc bloc) => bloc.state);
     return StreamBuilder<List<Chat>>(
-      initialData: [],
+      initialData: state.chats,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Flexible(
@@ -24,9 +26,9 @@ class ChatList extends StatelessWidget {
             ),
           );
         }
-        return const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Text('Connected with user with id: 11122112'),
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text('Connected room id: ${state.roomId}'),
         );
       },
     );

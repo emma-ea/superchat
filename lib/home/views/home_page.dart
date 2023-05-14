@@ -54,7 +54,7 @@ class _HomeViewState extends State<_HomeView> with WidgetsBindingObserver {
 
         if (state.status == HomeStatus.loaded) {
           ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text('opening chat for ${state.searchCategory}'),));
-          Navigator.of(context).push(ChatPage.routeWithParams(state.searchCategory));
+          Navigator.of(context).push(ChatPage.routeWithParams(state.searchCategory, state.userId));
         }
 
         if (state.status == HomeStatus.error) {
