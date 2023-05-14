@@ -21,8 +21,8 @@ class ChatRepositoryImpl extends ChatRepository {
   }
 
   @override
-  Future<int> setupChatRoom({required String category}) {
-    return _datasource.setupChatRoom(category);
+  Future<DateTime> setupChatRoom({required String roomId}) {
+    return _datasource.setupChatRoom(roomId);
   }
   
   @override
@@ -31,7 +31,7 @@ class ChatRepositoryImpl extends ChatRepository {
   }
   
   @override
-  void listenToRoom() {
+  Future<void> listenToRoom() {
     return _datasource.listenToEmptyRoom();
   }
 }

@@ -15,38 +15,28 @@ class ChatRemoteDatasource {
 
   Stream<String> get getUserInRoom => chatRoomListener.stream;
 
-  Future<int> setupChatRoom(String term) async {
-    final randomUser = await getRandomUserFromCategory(term);
-    final docName = '${_auth.currentUser!.uid}-$randomUser';
-
-    print('---------------');
-    print(docName);
-    print('---------------');
-
-    if (randomUser.isEmpty) {
-      return 112;
-    }
-
-    _db.collection(AppConstants.firestoreRandomChats)
-      .doc(docName)
-      .set({'time': DateTime.now()})
-      .onError((error, stackTrace) => ChatRoomCreationException(error as String));
-
-    return 100;
-
+  Future<DateTime> setupChatRoom(String roomId) async {
+    DateTime? date = DateTime.now();
+    await _db.collection(AppConstants.firestoreRandomChats)
+      .doc(roomId)
+      .set({'date': date})
+      .whenComplete(() {
+      });
+    return date;
   }
 
-  void listenToEmptyRoom() {
+  Future<void> listenToEmptyRoom() async {
     _db.collection(AppConstants.firestoreRandomChats)
       .snapshots()
-      .listen((event) {
-        if (event.size > 0) {
-          final doc = event.docs.firstWhere((element) => element.id.contains(_auth.currentUser!.uid));
-          chatRoomListener.sink.add(doc.id);
-          chatRoomListener.done;
-          print('---------$runtimeType--------');
-          print('ending stream. user found waiting');
-          print('-----------------');
+      .listen((documents) {
+        if (documents.size > 0) {
+          final userRoom = documents.docs.any((doc) => doc.id.contains(_auth.currentUser!.uid));
+          if (userRoom) {
+            final room = documents.docs.firstWhere((doc) => doc.id.contains(_auth.currentUser!.uid));
+            chatRoomListener.sink.add(room.id);
+            chatRoomListener.close();
+            setupChatRoom(room.id);
+          }
         }
       });
   }

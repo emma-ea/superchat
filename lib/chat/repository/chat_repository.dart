@@ -1,9 +1,9 @@
 import 'package:superchat/chat/data/chat.dart';
 
 abstract class ChatRepository {
-  Future<int> setupChatRoom({required String category});
+  Future<DateTime> setupChatRoom({required String roomId});
   Stream<String> listenToEmptyRoom();
-  void listenToRoom();
+  Future<void> listenToRoom();
   Future<void> sendChat();
   Stream<Chat> getMessages();
 }
