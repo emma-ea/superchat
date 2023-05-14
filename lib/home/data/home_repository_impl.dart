@@ -17,13 +17,18 @@ class HomeRepositoryImpl extends HomeRepository {
   }
 
   @override
-  Future<int> processCategory({required String term}) {
+  Future<int> generateTopic({required String term}) {
     return _dataSource.processCategory(term);
   }
   
   @override
   Stream<int> getActiveUsers() {
     return _dataSource.activeUsers;
+  }
+  
+  @override
+  Future<void> updateUserStatus({required String userId, required bool isActive, required bool inChat}) {
+    return _dataSource.updateActiveUserInfo(userId, isActive: isActive, inChat: inChat);
   }
 
 }

@@ -6,5 +6,6 @@ export 'repository/home_repository.dart';
 
 export 'data/home_repository_impl.dart';
 export 'data/remote_datasource.dart';
+export 'data/local_datasource.dart';
 
 export 'di/home_injector.dart';

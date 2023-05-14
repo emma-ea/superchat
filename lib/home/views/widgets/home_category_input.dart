@@ -27,6 +27,7 @@ class CategoryChatInput extends StatelessWidget {
                   hintText: hint,
                   border: const OutlineInputBorder(),
                 ),
+                onEditingComplete: onTap,
               ),
               const SizedBox(height: 3,),
               const Text('Enter a chat topic to find interested users', style: TextStyle(fontSize: 9),),

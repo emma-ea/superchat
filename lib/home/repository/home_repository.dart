@@ -4,6 +4,8 @@ abstract class HomeRepository {
 
   Stream<int> getActiveUsers();
 
-  Future<int> processCategory({required String term});
+  Future<int> generateTopic({required String term});
+
+  Future<void> updateUserStatus({required String userId, required bool isActive, required bool inChat});
 
 }

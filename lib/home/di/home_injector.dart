@@ -20,7 +20,8 @@ class HomeInjector {
   }
 
   void setup() {
-    _di.registerSingleton<HomeRepository>(HomeRepositoryImpl(RemoteDataSource()));
+    final cache = LocalDatasource();
+    _di.registerSingleton<HomeRepository>(HomeRepositoryImpl(RemoteDataSource(cache)));
   }
 
 }
