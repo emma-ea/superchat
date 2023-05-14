@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:superchat/core_utils/chat_exceptions.dart';
 import 'package:superchat/core_utils/constants.dart';
 
+import 'package:superchat/home/data/local_datasource.dart';
+
 class RemoteDataSource {
 
   FirebaseFirestore db = FirebaseFirestore.instance;
@@ -15,7 +17,9 @@ class RemoteDataSource {
 
   Stream<int> get activeUsers => activeUsersController.stream;
 
-  RemoteDataSource() {
+  final LocalDatasource _cache;
+
+  RemoteDataSource(this._cache) {
     getActiveUsers();
   }
   
@@ -29,31 +33,47 @@ class RemoteDataSource {
       throw const UserCreationException('Couldn\'t access user id');
     }
 
-    await updateActiveUserInfo(user.user!.uid, isActive: true);
+    await updateActiveUserInfo(user.user!.uid, isActive: true, setFirstLogin: true);
+    _cache.saveUser(user.user!.uid);
     return user.user?.uid ?? 'random-11223';
   }
 
   Future<String> getUser({bool? signOff}) async {
-    String uid = '';
-    if (auth.currentUser != null) {
+    String uid = await _cache.getUser() ?? '';
+
+    if (auth.currentUser != null || uid.isNotEmpty) {
       uid = auth.currentUser!.uid;
       await updateActiveUserInfo(uid, isActive: signOff ?? true);
+      await _cache.saveUser(uid);
     }
+
     return uid;
   }
 
-  Future<void> updateActiveUserInfo(String userId, {bool isActive = false}) async {
+  Future<void> updateActiveUserInfo(String userId, {bool isActive = false, bool inChat = false, bool setFirstLogin = false}) async {
 
     final deviceInfo = await DeviceInfoPlugin().deviceInfo;
 
-    db.collection(AppConstants.firestoreUserCollections)
-      .doc(userId)
-      .set({
-        'active': isActive,
-        'uid': userId,
-        'last_visited': DateTime.now(),
-        'device': deviceInfo.data.toString(),
-      }).onError((error, stackTrace) => UserInfoUpdateException(error as String));
+    final data = {
+      'active': isActive,
+      'uid': userId,
+      'last_visited': DateTime.now(),
+      'in_chat': inChat,
+      'device': deviceInfo.data.toString(),
+    };
+
+    if (setFirstLogin) {
+      data.putIfAbsent('first_login', () => DateTime.now());
+      db.collection(AppConstants.firestoreUserCollections)
+        .doc(userId)
+        .set(data)
+        .onError((error, stackTrace) => UserInfoUpdateException(error as String));
+    } else {
+      db.collection(AppConstants.firestoreUserCollections)
+        .doc(userId)
+        .update(data)
+        .onError((error, stackTrace) => UserInfoUpdateException(error as String));
+    }
   }
 
   Future<void> getActiveUsers() async {
@@ -110,7 +130,7 @@ class RemoteDataSource {
     await db.collection(AppConstants.firestoreCategoryCollections)
       .doc(term.toLowerCase())
       .set(data)
-      .whenComplete(() => results = 1)
+      .whenComplete(() => results = AppConstants.addUserToTopic)
       .onError((error, stackTrace) => 
         throw CategoryCreationException(error as String)
       );
