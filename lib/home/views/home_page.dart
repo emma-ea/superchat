@@ -1,3 +1,5 @@
+import 'dart:html' as html;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:superchat/chat/chat.dart';
@@ -31,28 +33,11 @@ class _HomeViewState extends State<_HomeView> with WidgetsBindingObserver {
   final categoryController = TextEditingController();
 
   @override
-  void dispose() {
-    context.read<HomeCubit>().updateUserStatus(
-      userId: context.read<HomeCubit>().state.userId,
-    );
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
-      context.read<HomeCubit>().updateUserStatus(
-        userId: context.read<HomeCubit>().state.userId,
-      );
-    }
-
-    if (state == AppLifecycleState.resumed) {
-      context.read<HomeCubit>().updateUserStatus(
-        userId: context.read<HomeCubit>().state.userId,
-        isActive: true,
-      );
-    }
+  void initState() {
+    super.initState();
+    html.window.onBeforeUnload.listen((event) { 
+      context.read<HomeCubit>().deleteUser();
+    });
   }
 
   @override

@@ -30,5 +30,10 @@ class HomeRepositoryImpl extends HomeRepository {
   Future<void> updateUserStatus({required String userId, required bool isActive, required bool inChat}) {
     return _dataSource.updateActiveUserInfo(userId, isActive: isActive, inChat: inChat);
   }
+  
+  @override
+  Future<void> deleteUser(String uid) {
+    return _dataSource.deleteUser(uid);
+  }
 
 }

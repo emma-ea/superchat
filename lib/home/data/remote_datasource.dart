@@ -7,6 +7,7 @@ import 'package:superchat/core_utils/chat_exceptions.dart';
 import 'package:superchat/core_utils/constants.dart';
 
 import 'package:superchat/home/data/local_datasource.dart';
+import 'package:uuid/uuid.dart';
 
 class RemoteDataSource {
 
@@ -29,22 +30,37 @@ class RemoteDataSource {
       .onError((error, stackTrace) => 
         throw UserCreationException(error as String));
 
-    if (user.user?.uid == null) {
+    final uid = user.user?.uid;
+
+    if (uid == null) {
       throw const UserCreationException('Couldn\'t access user id');
     }
 
-    await updateActiveUserInfo(user.user!.uid, isActive: true, setFirstLogin: true);
-    _cache.saveUser(user.user!.uid);
-    return user.user?.uid ?? 'random-11223';
+    await updateActiveUserInfo(uid, isActive: true, setFirstLogin: true);
+
+    final cachedUid = await _cache.getUser() ?? '';
+
+    if (cachedUid.isNotEmpty && cachedUid != uid) {
+      deleteUser(cachedUid);
+    }
+
+    await _cache.saveUser(uid);
+    return uid;
   }
 
   Future<String> getUser({bool? signOff}) async {
-    String uid = await _cache.getUser() ?? '';
+    String uid = '';
 
-    if (auth.currentUser != null || uid.isNotEmpty) {
+    final cachedUid = await _cache.getUser() ?? '';
+
+    if (auth.currentUser != null) {
       uid = auth.currentUser!.uid;
       await updateActiveUserInfo(uid, isActive: signOff ?? true);
       await _cache.saveUser(uid);
+    }
+
+    if (cachedUid.isNotEmpty && cachedUid != uid) {
+      deleteUser(cachedUid);
     }
 
     return uid;
@@ -80,7 +96,7 @@ class RemoteDataSource {
     db.collection(AppConstants.firestoreUserCollections)
       .snapshots()
       .listen((documents) {
-        if (documents.docs.isNotEmpty) {
+        if (documents.docs.isNotEmpty && auth.currentUser != null) {
           activeUsersController.sink.add(filterActiveUsers(documents));
         }
       });
@@ -115,12 +131,20 @@ class RemoteDataSource {
     throw UnimplementedError('TODO');
   }
 
+  Future<void> deleteUser(String uid) async {
+    db.collection(AppConstants.firestoreUserCollections)
+      .doc(uid)
+      .delete();
+  }
+
   Future<int> processCategory(String term) async {
 
     int results = -1;
 
-    final categories = await getUsersInCategory(term);
+    List<String> categories = await getUsersInCategory(term);
     categories.add(await getUser());
+
+    categories = categories.toSet().toList();
 
     final data = {
       'waiting_users': categories,

@@ -45,6 +45,10 @@ class HomeCubit extends Cubit<HomeState> {
     await repository.updateUserStatus(userId: userId, isActive: isActive, inChat: inChat);
   }
 
+  Future<void> deleteUser() async {
+    await repository.deleteUser(state.userId);
+  }
+
   Stream<int> getActiveUsers() {
     return repository.getActiveUsers();
   }
