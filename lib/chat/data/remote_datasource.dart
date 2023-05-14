@@ -10,12 +10,17 @@ import 'package:superchat/core_utils/firebase_config.dart';
 
 class ChatRemoteDatasource {
 
-  final FirebaseFirestore _db = FirebaseConfig.firestore;
-  final FirebaseAuth _auth = FirebaseConfig.firebaseAuth;
+  late FirebaseFirestore _db;
+  late FirebaseAuth _auth;
 
   StreamController<String> chatRoomListener = StreamController.broadcast();
 
   Stream<String> get getUserInRoom => chatRoomListener.stream;
+
+  ChatRemoteDatasource() {
+    _db = FirebaseConfig.firestore;
+    _auth = FirebaseConfig.firebaseAuth;
+  }
 
   Future<DateTime> setupChatRoom(String roomId) async {
     DateTime? date = DateTime.now();

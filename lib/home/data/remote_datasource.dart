@@ -13,8 +13,8 @@ import 'package:uuid/uuid.dart';
 
 class RemoteDataSource {
 
-  final FirebaseFirestore _db = FirebaseConfig.firestore;
-  final FirebaseAuth _auth = FirebaseConfig.firebaseAuth;
+  late FirebaseFirestore _db;
+  late FirebaseAuth _auth;
 
   StreamController<int> activeUsersController = StreamController.broadcast();
 
@@ -23,6 +23,8 @@ class RemoteDataSource {
   final LocalDatasource _cache;
 
   RemoteDataSource(this._cache) {
+    _db = FirebaseConfig.firestore;
+    _auth = FirebaseConfig.firebaseAuth;
     getActiveUsers();
   }
   

@@ -20,8 +20,11 @@ void main() async {
     final auth = FirebaseAuth.instance;
     fire.useFirestoreEmulator('localhost', 4002);
     auth.useAuthEmulator('localhost', 4003);
-    FirebaseConfig.config(fire, auth);
+    FirebaseConfig.config(firestoreInstance: fire, authInstance: auth);
     logPrinter('using firebase emulators', trace: 'main');
+  } else {
+    FirebaseConfig.config();
+    logPrinter('using firebase on prod', trace: 'main');
   }
 
   DIInitializer.init();
