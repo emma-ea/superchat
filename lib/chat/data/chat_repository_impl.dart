@@ -15,9 +15,8 @@ class ChatRepositoryImpl extends ChatRepository {
   }
 
   @override
-  Future<void> sendChat() {
-    // TODO: implement sendChat
-    throw UnimplementedError();
+  Future<int> sendChat({required String roomId, required Chat chat}) {
+    return _datasource.sendChat(roomId, chat);
   }
 
   @override

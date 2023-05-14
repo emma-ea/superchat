@@ -35,3 +35,7 @@ class ChatRoomCreationException extends ChatExceptions {
 class DataConnectionTimeout extends ChatExceptions {
   const DataConnectionTimeout(super.error);
 }
+
+class SendingChatError extends ChatExceptions {
+  const SendingChatError(super.error);
+}

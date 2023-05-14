@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:superchat/chat/data/chat.dart';
 import 'package:superchat/core_utils/chat_exceptions.dart';
 import 'package:superchat/core_utils/constants.dart';
 
@@ -62,6 +63,22 @@ class ChatRemoteDatasource {
     }
 
     return '';
+  }
+
+  Future<int> sendChat(String roomId, Chat chat) async {
+    int res = -1;
+    final data = {
+      'message': chat.message,
+      'time_sent': chat.sentTime,
+      'user_id': chat.userId,
+    };
+    await _db.collection(AppConstants.firestoreRandomChats)
+      .doc(roomId)
+      .update(data)
+      .whenComplete(() => res = AppConstants.sentMessage)
+      .onError((error, stackTrace) => throw SendingChatError(error as String));
+
+    return res;
   }
 
 }

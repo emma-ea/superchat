@@ -4,10 +4,10 @@ class Chat extends Equatable {
 
   final DateTime sentTime;
   final String message;
-  final String userId;
+  final String? userId;
   final bool sent;
 
-  const Chat({required this.message, required this.sentTime, required this.userId, this.sent = true});
+  const Chat({required this.message, required this.sentTime, this.userId, this.sent = false});
   
   @override
   List<Object?> get props => [ message, sentTime ];

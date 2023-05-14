@@ -11,4 +11,5 @@ class AppConstants {
 
   // RETURN CODES
   static const int addUserToTopic = 111;
+  static const int sentMessage = 110;
 }

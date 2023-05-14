@@ -4,6 +4,6 @@ abstract class ChatRepository {
   Future<DateTime> setupChatRoom({required String roomId});
   Stream<String> listenToEmptyRoom();
   Future<void> listenToRoom();
-  Future<void> sendChat();
+  Future<int> sendChat({required String roomId, required Chat chat});
   Stream<Chat> getMessages();
 }
