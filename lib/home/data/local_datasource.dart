@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:superchat/core_utils/printer.dart';
 
 class LocalDatasource {
 
@@ -7,17 +8,13 @@ class LocalDatasource {
 
   Future<String?> getUser() async {
     prefs = await SharedPreferences.getInstance();
-    print('-------------');
-    print('getUser');
-    print('-------------');
+    logPrinter('get user from cache', trace: 'localdatasource - getUser()');
     return prefs.getString(kCachedUser);
   }
 
   Future<void> saveUser(String userId) async {
     prefs = await SharedPreferences.getInstance();
-    print('-------------');
-    print('saveUser');
-    print('-------------');
+    logPrinter('saving user to cache', trace: 'localdatasource - saveUser()');
     await prefs.setString(kCachedUser, userId);
   }
 

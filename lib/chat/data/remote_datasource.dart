@@ -6,11 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:superchat/chat/data/chat.dart';
 import 'package:superchat/core_utils/chat_exceptions.dart';
 import 'package:superchat/core_utils/constants.dart';
+import 'package:superchat/core_utils/firebase_config.dart';
 
 class ChatRemoteDatasource {
 
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseConfig.firestore;
+  final FirebaseAuth _auth = FirebaseConfig.firebaseAuth;
 
   StreamController<String> chatRoomListener = StreamController.broadcast();
 

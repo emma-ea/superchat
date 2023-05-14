@@ -5,14 +5,16 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:superchat/core_utils/chat_exceptions.dart';
 import 'package:superchat/core_utils/constants.dart';
+import 'package:superchat/core_utils/firebase_config.dart';
+import 'package:superchat/core_utils/printer.dart';
 
 import 'package:superchat/home/data/local_datasource.dart';
 import 'package:uuid/uuid.dart';
 
 class RemoteDataSource {
 
-  FirebaseFirestore db = FirebaseFirestore.instance;
-  FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseConfig.firestore;
+  final FirebaseAuth _auth = FirebaseConfig.firebaseAuth;
 
   StreamController<int> activeUsersController = StreamController.broadcast();
 
@@ -25,7 +27,7 @@ class RemoteDataSource {
   }
   
   Future<String> createUser() async {
-    final user = await auth
+    final user = await _auth
       .signInAnonymously()
       .onError((error, stackTrace) => 
         throw UserCreationException(error as String));
@@ -53,8 +55,8 @@ class RemoteDataSource {
 
     final cachedUid = await _cache.getUser() ?? '';
 
-    if (auth.currentUser != null) {
-      uid = auth.currentUser!.uid;
+    if (_auth.currentUser != null) {
+      uid = _auth.currentUser!.uid;
       await updateActiveUserInfo(uid, isActive: signOff ?? true);
       await _cache.saveUser(uid);
     }
@@ -80,12 +82,12 @@ class RemoteDataSource {
 
     if (setFirstLogin) {
       data.putIfAbsent('first_login', () => DateTime.now());
-      db.collection(AppConstants.firestoreUserCollections)
+      _db.collection(AppConstants.firestoreUserCollections)
         .doc(userId)
         .set(data)
         .onError((error, stackTrace) => UserInfoUpdateException(error as String));
     } else {
-      db.collection(AppConstants.firestoreUserCollections)
+      _db.collection(AppConstants.firestoreUserCollections)
         .doc(userId)
         .update(data)
         .onError((error, stackTrace) => UserInfoUpdateException(error as String));
@@ -93,10 +95,10 @@ class RemoteDataSource {
   }
 
   Future<void> getActiveUsers() async {
-    db.collection(AppConstants.firestoreUserCollections)
+    _db.collection(AppConstants.firestoreUserCollections)
       .snapshots()
       .listen((documents) {
-        if (documents.docs.isNotEmpty && auth.currentUser != null) {
+        if (documents.docs.isNotEmpty && _auth.currentUser != null) {
           activeUsersController.sink.add(filterActiveUsers(documents));
         }
       });
@@ -104,13 +106,13 @@ class RemoteDataSource {
 
   int filterActiveUsers(QuerySnapshot<Map<String, dynamic>> documents) {
     final filteredDocs = documents.docs;
-    filteredDocs.removeWhere((doc) => doc.id == auth.currentUser!.uid);
+    filteredDocs.removeWhere((doc) => doc.id == _auth.currentUser!.uid);
     filteredDocs.retainWhere((doc) => (doc.data()['active'] as bool));
     return filteredDocs.length;
   }
 
   Future<List<String>> getUsersInCategory(String term) async {
-    final categories = await db.collection(AppConstants.firestoreCategoryCollections)
+    final categories = await _db.collection(AppConstants.firestoreCategoryCollections)
       .doc(term.toLowerCase())
       .get()
       .onError((error, stackTrace) => 
@@ -119,9 +121,7 @@ class RemoteDataSource {
 
     if (!categories.exists) { return []; }
 
-    print('----------getUsersInCategory-------------');
-    print(categories.data()![AppConstants.firestoreCategoryWaitingRoom]);
-    print('-----------------------');
+    logPrinter(categories.data()![AppConstants.firestoreCategoryWaitingRoom], trace: 'getUserInCategory()');
     if (categories.data()![AppConstants.firestoreCategoryWaitingRoom] == Null) return [];
 
     return (categories.data()?[AppConstants.firestoreCategoryWaitingRoom] as List).map((e) => e as String).toList();
@@ -132,7 +132,7 @@ class RemoteDataSource {
   }
 
   Future<void> deleteUser(String uid) async {
-    db.collection(AppConstants.firestoreUserCollections)
+    _db.collection(AppConstants.firestoreUserCollections)
       .doc(uid)
       .delete();
   }
@@ -151,7 +151,7 @@ class RemoteDataSource {
       'recent_search': DateTime.now(),
     };
 
-    await db.collection(AppConstants.firestoreCategoryCollections)
+    await _db.collection(AppConstants.firestoreCategoryCollections)
       .doc(term.toLowerCase())
       .set(data)
       .whenComplete(() => results = AppConstants.addUserToTopic)
