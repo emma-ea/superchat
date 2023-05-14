@@ -15,16 +15,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  DIInitializer.init();
-
-  if (Env.env == 'dev') {
-    final fire = FirebaseFirestore.instance; 
-    fire.useFirestoreEmulator('localhost', 4002);
+  if (Env.isDev) {
+    final fire = FirebaseFirestore.instance;
     final auth = FirebaseAuth.instance;
+    fire.useFirestoreEmulator('localhost', 4002);
     auth.useAuthEmulator('localhost', 4003);
     FirebaseConfig.config(fire, auth);
     logPrinter('using firebase emulators', trace: 'main');
   }
+
+  DIInitializer.init();
 
   runApp(const MyApp());
 }
