@@ -1,8 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:superchat/core_utils/chat_analytics.dart';
 import 'package:superchat/core_utils/di_initializer.dart';
 import 'package:superchat/firebase_options.dart';
 import 'package:superchat/home/home.dart';
@@ -20,7 +18,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -30,7 +27,7 @@ class MyApp extends StatelessWidget {
       },
       initialRoute: HomePage.route,
       navigatorObservers: [
-        FirebaseAnalyticsObserver(analytics: ChatAnalytics.instance.observer),
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
       ],
     );
   }
