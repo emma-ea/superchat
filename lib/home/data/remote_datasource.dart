@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:superchat/core_utils/chat_exceptions.dart';
@@ -31,8 +32,8 @@ class RemoteDataSource {
   Future<String> createUser() async {
     final user = await _auth
       .signInAnonymously()
-      .onError((error, stackTrace) => 
-        throw UserCreationException(error as String));
+      .onError((FirebaseAuthException error, stackTrace) => 
+        throw UserCreationException(error.message!));
 
     final uid = user.user?.uid;
 
@@ -87,12 +88,12 @@ class RemoteDataSource {
       _db.collection(AppConstants.firestoreUserCollections)
         .doc(userId)
         .set(data)
-        .onError((error, stackTrace) => UserInfoUpdateException(error as String));
+        .onError((FirebaseException error, stackTrace) => UserInfoUpdateException(error.message!));
     } else {
       _db.collection(AppConstants.firestoreUserCollections)
         .doc(userId)
         .update(data)
-        .onError((error, stackTrace) => UserInfoUpdateException(error as String));
+        .onError((FirebaseException error, stackTrace) => UserInfoUpdateException(error.message!));
     }
   }
 
@@ -134,9 +135,18 @@ class RemoteDataSource {
   }
 
   Future<void> deleteUser(String uid) async {
-    _db.collection(AppConstants.firestoreUserCollections)
-      .doc(uid)
-      .delete();
+    final functions = FirebaseConfig.functions;
+    functions.httpsCallable('deleteUserRecord')
+      .call(
+        {
+          'data': {
+            'uid': uid,
+            'collection': AppConstants.firestoreUserCollections,
+          }
+        }
+      ).onError((error, stackTrace) { 
+        throw ChatCloudFunctionsError(error.toString()); 
+      });
   }
 
   Future<int> processCategory(String term) async {
@@ -157,8 +167,8 @@ class RemoteDataSource {
       .doc(term.toLowerCase())
       .set(data)
       .whenComplete(() => results = AppConstants.addUserToTopic)
-      .onError((error, stackTrace) => 
-        throw CategoryCreationException(error as String)
+      .onError((FirebaseFunctionsException error, stackTrace) => 
+        throw CategoryCreationException(error.message!)
       );
 
     return results;

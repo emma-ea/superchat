@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:superchat/core_utils/chat_exceptions.dart';
 import 'package:superchat/core_utils/constants.dart';
+import 'package:superchat/core_utils/printer.dart';
 import 'package:superchat/home/repository/home_repository.dart';
 
 part 'home_state.dart';
@@ -46,7 +47,11 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> deleteUser() async {
-    await repository.deleteUser(state.userId);
+    try {
+      await repository.deleteUser(state.userId);
+    } on ChatCloudFunctionsError catch(e, _) {
+      logPrinter(e.error, trace: 'homeCubit - deleteUser()');
+    }
   }
 
   Stream<int> getActiveUsers() {
