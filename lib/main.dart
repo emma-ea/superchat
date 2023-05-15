@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,9 +19,11 @@ void main() async {
   if (Env.isDev) {
     final fire = FirebaseFirestore.instance;
     final auth = FirebaseAuth.instance;
+    final functions = FirebaseFunctions.instance;
     fire.useFirestoreEmulator('localhost', 4002);
     auth.useAuthEmulator('localhost', 4003);
-    FirebaseConfig.config(firestoreInstance: fire, authInstance: auth);
+    functions.useFunctionsEmulator('localhost', 4004);
+    FirebaseConfig.config(firestoreInstance: fire, authInstance: auth, functionsInstance: functions);
     logPrinter('using firebase emulators', trace: 'main');
   } else {
     FirebaseConfig.config();

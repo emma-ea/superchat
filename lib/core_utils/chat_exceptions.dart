@@ -39,3 +39,7 @@ class DataConnectionTimeout extends ChatExceptions {
 class SendingChatError extends ChatExceptions {
   const SendingChatError(super.error);
 }
+
+class ChatCloudFunctionsError extends ChatExceptions {
+  const ChatCloudFunctionsError(super.error);
+}

@@ -58,6 +58,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '818941452352',
     projectId: 'superchat-413e6',
     authDomain: 'superchat-413e6.firebaseapp.com',
+    databaseURL: 'https://superchat-413e6-default-rtdb.firebaseio.com',
     storageBucket: 'superchat-413e6.appspot.com',
     measurementId: 'G-LCFMGBJC15',
   );
